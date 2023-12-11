@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import logo from "../assets/react.svg";
 import { ChevronDown, ChevronUp, EllipsisVertical } from "react-ionicons";
 import HeaderDropDown from "./HeaderDropDown";
+import AddEditBoardModal from "../Modals/AddEditBoardModal";
 
-const Header = () => {
+const Header = ({ boardModalOpen, setBoardModalOpen }) => {
   const [openDropDown, setDropDown] = useState(false);
 
   return (
@@ -14,30 +15,36 @@ const Header = () => {
           <h3 className=" hidden md:inline-block font-bold font-sans md:text-2xl">
             InVision
           </h3>
-          <div className=" flex items-center bg-purple-200 px-2 py-1 rounded-md">
+          <div className=" flex items-center px-2 py-1 rounded-md">
             <h3 className=" truncate max-w-[200px] md:text:2xl text-xl font-bold md:ml-20 font-sans ">
               Board Name
             </h3>
-            <div className=" w-auto h-[100%] flex items-center ml-2 mt-0.5 cursor-pointer md:hidden " onClick={()=>{setDropDown(state => !state)}}>
-                {
-                    openDropDown? <ChevronUp/>:<ChevronDown/>
-                }
+            <div
+              className=" w-auto h-[100%] flex items-center ml-2 mt-0.5 cursor-pointer md:hidden"
+              onClick={() => {
+                setDropDown((state) => !state);
+              }}
+            >
+              {openDropDown ? (
+                <ChevronUp color={"#8b5cf6"} />
+              ) : (
+                <ChevronDown color={"#8b5cf6"} />
+              )}
             </div>
           </div>
         </div>
 
         <div className=" flex space-x-4 items-center md:space-x-6">
-            <button className=" button"> + Add New Task</button>
-            <button className=" button rounded-full md:hidden">+</button>
-            <EllipsisVertical className=" cursor-pointer"/>
+          <button className=" hidden md:block button"> + Add New Task</button>
+          <button className=" button rounded-full md:hidden">+</button>
+          <EllipsisVertical className=" cursor-pointer" color={"#8b5cf6"} />
         </div>
-
       </header>
 
-      {
-        openDropDown && <HeaderDropDown setDropDown={setDropDown}/>
-      }
-
+      {openDropDown && <HeaderDropDown setDropDown={setDropDown} setBoardModalOpen={setBoardModalOpen}/>}
+      {boardModalOpen && (
+        <AddEditBoardModal setBoardModalOpen={setBoardModalOpen} />
+      )}
     </div>
   );
 };
