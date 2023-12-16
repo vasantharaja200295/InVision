@@ -1,65 +1,75 @@
 import React, { useState } from "react";
 import { CloseOutline } from "react-ionicons";
-import { useDispatch } from "react-redux";
-import { v4 as uuidv4} from "uuid";
-import boardSlice from '../redux/boardsSlice';
-
+import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
+import boardSlice from "../redux/boardsSlice";
 
 const AddEditBoardModal = ({ setBoardModalOpen, type }) => {
+  const dispatch = useDispatch();
+  const [name, setName] = useState("");
+  const [isValid, setIsValid] = useState(true);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [newColumns, setNewColumns] = useState([
+    { name: "Todo", task: [], id: uuidv4() },
+    { name: "In Progress", task: [], id: uuidv4() },
+    { name: "Done", task: [], id: uuidv4() },
+  ]);
 
-    const dispatch = useDispatch();
-    const [name, setName] = useState("");
-    const  [isValid, setIsValid] = useState(true);
-    const [newColumns, setNewColumns] = useState(
-        [
-            {name:'Todo', task:[], id:uuidv4()},
-            {name:'In Progress', task:[], id:uuidv4()},
-            {name:'Done', task:[], id:uuidv4()}
+  const board = useSelector((state)=>state.board).find((board)=>board.isActive)
 
-        ]
-    )
-
-    const onChange = (id, newValue) =>{
-        setNewColumns((previousState) =>{
-            const newState = [...previousState];
-            const column = newState.find((col)=>col.id === id)
-            column.name = newValue;
-            return newState;
+  if (type === "edit" && isFirstLoad) {
+    setNewColumns(
+        board.columns.map((col)=>{
+            return { ...col, id: uuidv4()}
         })
+    );
+    setName(board.name);
+    setIsFirstLoad(false);
+  }
+
+  const onChange = (id, newValue) => {
+    setNewColumns((previousState) => {
+      const newState = [...previousState];
+      const column = newState.find((col) => col.id === id);
+      column.name = newValue;
+      return newState;
+    });
+  };
+
+  const onDelete = (id) => {
+    setNewColumns((previousState) =>
+      previousState.filter((item) => item.id !== id)
+    );
+  };
+
+  const addColumn = () => {
+    setNewColumns([...newColumns, { name: "", task: [], id: uuidv4() }]);
+  };
+
+  const validate = () => {
+    setIsValid(false);
+    if (!name.trim()) {
+      return false;
     }
 
-    const onDelete = (id) =>{
-        setNewColumns((previousState)=> previousState.filter((item)=>item.id !== id))
+    for (const column of newColumns) {
+      if (!column.name.trim()) {
+        return false;
+      }
     }
 
-    const addColumn = () =>{
-        setNewColumns([ ...newColumns, { name:"",task:[] ,id:uuidv4()}])
-    }
+    setIsValid(true);
+    return true;
+  };
 
-    const validate = () =>{
-        setIsValid(false);
-        if(!name.trim()){
-            return false;
-        }
-
-        for(const column of newColumns){
-            if(!column.name.trim()){
-                return false;
-            }
-        }
-        
-        setIsValid(true);
-        return true;
+  const onSubmit = (type) => {
+    setBoardModalOpen(false);
+    if (type === "add") {
+      dispatch(boardSlice.actions.addBoard({ name, newColumns }));
+    } else {
+      dispatch(boardSlice.actions.editBoard({ name, newColumns }));
     }
-
-    const onSubmit = (type) => {
-        setBoardModalOpen(false);
-        if(type==='add'){
-            dispatch(boardSlice.actions.addBoard({name, newColumns}))
-        }else{
-            dispatch(boardSlice.actions.editBoard({name, newColumns}))
-        }
-    }
+  };
 
   return (
     <div
@@ -72,73 +82,85 @@ const AddEditBoardModal = ({ setBoardModalOpen, type }) => {
         setBoardModalOpen(false);
       }}
     >
-        <div
-            className=" scrollbar-hide overflow-y-scroll max-h-[95vh] bg-white dark:bg-slate-900 text-black dark:text-white font-bold shadow-md
+      <div
+        className=" scrollbar-hide overflow-y-scroll max-h-[95vh] bg-white dark:bg-slate-900 text-black dark:text-white font-bold shadow-md
              max-w-md mx-auto w-full px-8 py-8 rounded-xl"
-        >
-            <h3 className=" text-lg">
-                {type==='edit'?'Edit': 'Add New'} Board
-            </h3>
+      >
+        <h3 className=" text-lg">
+          {type === "edit" ? "Edit" : "Add New"} Board
+        </h3>
 
-            <div className=" mt-8 flex flex-col space-y-3">
-                <label htmlFor="" className=" text-sm font-medium dark:text-white text-gray-500">Board Name</label>
-                <input className=" bg-transparent px-4 py-2 rounded-md text-sm font-normal border border-gray-600 outline-none focus:outline-[#8b5cf6] outline-offset-0"
-                placeholder="e.g Web Design"
-                onChange={(e)=>{
-                    setName(e.target.value)}}
-                id="board-name-input"
+        <div className=" mt-8 flex flex-col space-y-3">
+          <label
+            htmlFor=""
+            className=" text-sm font-medium dark:text-white text-gray-500"
+          >
+            Board Name
+          </label>
+          <input
+            className=" bg-transparent px-4 py-2 rounded-md text-sm font-normal border border-gray-600 outline-none focus:outline-[#8b5cf6] outline-offset-0"
+            placeholder={"e.g Web Design"}
+            value={type === "edit" ? name : ""}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
+            id="board-name-input"
+          />
+        </div>
+
+        <div className=" mt-8 flex flex-col space-y-3">
+          <label className=" text-sm font-medium dark:text-white text-gray-500">
+            Board Columns
+          </label>
+          {newColumns.map((column, index) => {
+            return (
+              <div key={index} className=" flex items-center w-full space-x-2">
+                <input
+                  className=" bg-transparent flex-grow px-4 py-2 rounded-md text-sm font-normal border border-gray-600 outline-none focus:outline-[#8b5cf6] outline-offset-0"
+                  onChange={(e) => {
+                    onChange(column.id, e.target.value);
+                  }}
+                  value={column.name}
+                  type="text"
                 />
-            </div>
+                <CloseOutline
+                  color={"#7f7f7f"}
+                  className=" cursor-pointer"
+                  onClick={() => {
+                    onDelete(column.id);
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
 
-            <div 
-            className=" mt-8 flex flex-col space-y-3">
-                <label
-                    className=" text-sm font-medium dark:text-white text-gray-500"
-                >Board Columns</label>
-                {
-                    newColumns.map((column, index)=>{
-                        return(
-                            <div key={index} className=" flex items-center w-full space-x-2">
-                                <input className=" bg-transparent flex-grow px-4 py-2 rounded-md text-sm font-normal border border-gray-600 outline-none focus:outline-[#8b5cf6] outline-offset-0"
-                                 onChange={(e)=>{
-                                    onChange(column.id, e.target.value)
-                                 }}
-                                 value={column.name}
-                                 type="text"/>
-                                 <CloseOutline color={'#7f7f7f'} className=" cursor-pointer" onClick={()=>{
-                                    onDelete(column.id)
-                                 }}/>
-                            </div>
-                        )
-                    })
-                }
-            </div>
-
-            <div>
-                <button className=" w-full items-center hover:opacity-75 dark:text-[#8b5cf6]
+        <div>
+          <button
+            className=" w-full items-center hover:opacity-75 dark:text-[#8b5cf6]
                  dark:bg-white text-white mt-2 bg-[#8b5cf6] py-2 rounded-md"
-                 onClick={()=>{
-                    addColumn()
-                 }}>
-                    + Add New Column
-                </button>
+            onClick={() => {
+              addColumn();
+            }}
+          >
+            + Add New Column
+          </button>
 
-                <button className=" w-full items-center hover:opacity-75
+          <button
+            className=" w-full items-center hover:opacity-75
                 dark:text-white dark:bg-[#8b5cf6] relative text-white
                  mt-2 bg-[#8b5cf6] py-2 rounded-md"
-                 onClick={
-                    ()=>{
-                        const isValid = validate();
-                        if (isValid){
-                            onSubmit(type)
-                        }
-                    }
-                 }>
-                    {type === 'add'?"Create New Board":'Save Changes'}
-                </button>
-            </div>
-
+            onClick={() => {
+              const isValid = validate();
+              if (isValid) {
+                onSubmit(type);
+              }
+            }}
+          >
+            {type === "add" ? "Create New Board" : "Save Changes"}
+          </button>
         </div>
+      </div>
     </div>
   );
 };

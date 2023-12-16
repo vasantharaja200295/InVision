@@ -5,14 +5,29 @@ import HeaderDropDown from "./HeaderDropDown";
 import AddEditBoardModal from "../Modals/AddEditBoardModal";
 import { useSelector } from "react-redux";
 import AddTaskModal from "../Modals/AddTaskModal";
+import ElipsisMenu from "./ElipsisMenu";
 
 const Header = ({ boardModalOpen, setBoardModalOpen }) => {
   const [openDropDown, setDropDown] = useState(false);
   const [openAddEditTask, setAddEditTask] = useState(false);
+  const [isElipsisOpen, setElipsisOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [boardType, setBoardType] = useState("add");
 
   const boards = useSelector((state) => state.board);
   const board = boards.find((board) => board.isActive);
+
+
+  const setOpenEditModal = () =>{
+    setBoardModalOpen(true);
+    setElipsisOpen(false);
+  }
+
+  const setOpenDeleteModal = () =>{
+    setIsDeleteModalOpen(true);
+    setElipsisOpen(false);
+  }
+
 
   return (
     <div className=" p-4 fixed left-0 bg-white dark:bg-slate-900 z-50 right-0">
@@ -48,7 +63,14 @@ const Header = ({ boardModalOpen, setBoardModalOpen }) => {
                 setAddEditTask(state => !state)
             }}
           >+</button>
-          <EllipsisVertical className=" cursor-pointer" color={"#8b5cf6"} />
+          <EllipsisVertical className=" cursor-pointer" color={"#8b5cf6"} onClick={()=>{
+            setBoardType('edit');
+            setDropDown(false);
+            setElipsisOpen((state)=>!state)
+          }}/>
+          {
+            isElipsisOpen && <ElipsisMenu type={'Boards'} setOpenDeleteModal={setOpenDeleteModal} setOpenEditModal={setOpenEditModal}/>
+          }
         </div>
       </header>
 
