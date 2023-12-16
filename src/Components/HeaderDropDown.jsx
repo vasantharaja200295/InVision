@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { AddCircle, Clipboard, Moon, Sunny } from "react-ionicons";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Switch } from "@headlessui/react";
 import useDarkMode from "../Hooks/useDarkMode";
+import boardsSlice from "../redux/boardsSlice";
 
 function HeaderDropDown({ setDropDown, setBoardModalOpen }) {
+    const dispatch = useDispatch()
   const [colorTheme, setTheme] = useDarkMode();
   const [darkMode, setdarkMode] = useState(
-    colorTheme === "light" ? true : false
+    colorTheme === "light"
   );
 
   const toggleDarkMode = (checked) => {
@@ -31,15 +33,20 @@ function HeaderDropDown({ setDropDown, setBoardModalOpen }) {
           All Boards ({boards?.length})
         </h3>
 
-        <div>
+        <div className=" px-2">
           {boards.map((item, index) => {
             return (
               <div
-                className={` flex items-baseline space-x-2 px-5 py-4 ${
+                className={` flex items-baseline space-x-2 px-5 py-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800
+                 my-1 rounded-md ${
                   item.isActive &&
-                  "bg-violet-500 rounded-r-full text-white mr-8"
+                  "bg-violet-500 rounded-md text-white hover:bg-violet-500 dark:hover:bg-violet-500"
                 }`}
                 key={index}
+
+                onClick={()=>{
+                    dispatch(boardsSlice.actions.setBoardActive({index}))
+                }}
               >
                 <div className=" flex items-center space-x-2">
                   <Clipboard
@@ -59,7 +66,7 @@ function HeaderDropDown({ setDropDown, setBoardModalOpen }) {
           onClick={() => {setBoardModalOpen(true)
             setDropDown(false)}}
         >
-          <div className=" flex items-center space-x-2">
+          <div className=" flex items-center space-x-2 cursor-pointer">
             <AddCircle color={"#7c3aed"} />
             <p className=" text-lg font-regular">Create New Board</p>
           </div>

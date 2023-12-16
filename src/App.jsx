@@ -5,7 +5,7 @@ import Center from './Components/Center'
 const App = () => {
     const [boardModalOpen, setBoardModalOpen] = useState(false)
   return (
-    <div>
+    <div className=' h-[100vh] w-[100%]'>
      <Header boardModalOpen={boardModalOpen} setBoardModalOpen={setBoardModalOpen}/>
      <Center/>
     </div>

@@ -1,9 +1,15 @@
 import React, { useState } from "react";
+import { CloseOutline } from "react-ionicons";
+import { useDispatch } from "react-redux";
 import { v4 as uuidv4} from "uuid";
+import boardSlice from '../redux/boardsSlice';
+
 
 const AddEditBoardModal = ({ setBoardModalOpen, type }) => {
 
+    const dispatch = useDispatch();
     const [name, setName] = useState("");
+    const  [isValid, setIsValid] = useState(true);
     const [newColumns, setNewColumns] = useState(
         [
             {name:'Todo', task:[], id:uuidv4()},
@@ -12,6 +18,49 @@ const AddEditBoardModal = ({ setBoardModalOpen, type }) => {
 
         ]
     )
+
+    const onChange = (id, newValue) =>{
+        setNewColumns((previousState) =>{
+            const newState = [...previousState];
+            const column = newState.find((col)=>col.id === id)
+            column.name = newValue;
+            return newState;
+        })
+    }
+
+    const onDelete = (id) =>{
+        setNewColumns((previousState)=> previousState.filter((item)=>item.id !== id))
+    }
+
+    const addColumn = () =>{
+        setNewColumns([ ...newColumns, { name:"",task:[] ,id:uuidv4()}])
+    }
+
+    const validate = () =>{
+        setIsValid(false);
+        if(!name.trim()){
+            return false;
+        }
+
+        for(const column of newColumns){
+            if(!column.name.trim()){
+                return false;
+            }
+        }
+        
+        setIsValid(true);
+        return true;
+    }
+
+    const onSubmit = (type) => {
+        setBoardModalOpen(false);
+        if(type==='add'){
+            dispatch(boardSlice.actions.addBoard({name, newColumns}))
+        }else{
+            dispatch(boardSlice.actions.editBoard({name, newColumns}))
+        }
+    }
+
   return (
     <div
       className=" fixed right-0 left-0 top-0 bottom-0 scrollbar-hide px-2 py-4 overflow-scroll z-50
@@ -49,14 +98,44 @@ const AddEditBoardModal = ({ setBoardModalOpen, type }) => {
                 {
                     newColumns.map((column, index)=>{
                         return(
-                            <div key={index} className=" flex items-center w-full">
+                            <div key={index} className=" flex items-center w-full space-x-2">
                                 <input className=" bg-transparent flex-grow px-4 py-2 rounded-md text-sm font-normal border border-gray-600 outline-none focus:outline-[#8b5cf6] outline-offset-0"
+                                 onChange={(e)=>{
+                                    onChange(column.id, e.target.value)
+                                 }}
                                  value={column.name}
                                  type="text"/>
+                                 <CloseOutline color={'#7f7f7f'} className=" cursor-pointer" onClick={()=>{
+                                    onDelete(column.id)
+                                 }}/>
                             </div>
                         )
                     })
                 }
+            </div>
+
+            <div>
+                <button className=" w-full items-center hover:opacity-75 dark:text-[#8b5cf6]
+                 dark:bg-white text-white mt-2 bg-[#8b5cf6] py-2 rounded-md"
+                 onClick={()=>{
+                    addColumn()
+                 }}>
+                    + Add New Column
+                </button>
+
+                <button className=" w-full items-center hover:opacity-75
+                dark:text-white dark:bg-[#8b5cf6] relative text-white
+                 mt-2 bg-[#8b5cf6] py-2 rounded-md"
+                 onClick={
+                    ()=>{
+                        const isValid = validate();
+                        if (isValid){
+                            onSubmit(type)
+                        }
+                    }
+                 }>
+                    {type === 'add'?"Create New Board":'Save Changes'}
+                </button>
             </div>
 
         </div>
