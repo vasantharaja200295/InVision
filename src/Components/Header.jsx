@@ -17,17 +17,15 @@ const Header = ({ boardModalOpen, setBoardModalOpen }) => {
   const boards = useSelector((state) => state.board);
   const board = boards.find((board) => board.isActive);
 
-
-  const setOpenEditModal = () =>{
+  const setOpenEditModal = () => {
     setBoardModalOpen(true);
     setElipsisOpen(false);
-  }
+  };
 
-  const setOpenDeleteModal = () =>{
+  const setOpenDeleteModal = () => {
     setIsDeleteModalOpen(true);
     setElipsisOpen(false);
-  }
-
+  };
 
   return (
     <div className=" p-4 fixed left-0 bg-white dark:bg-slate-900 z-50 right-0">
@@ -57,20 +55,39 @@ const Header = ({ boardModalOpen, setBoardModalOpen }) => {
         </div>
 
         <div className=" flex space-x-4 items-center md:space-x-6">
-          <button className=" hidden md:block button"> + Add New Task</button>
-          <button className=" button rounded-full md:hidden"
-            onClick={()=>{
-                setAddEditTask(state => !state)
+          <button
+            className=" hidden md:block button"
+            onClick={() => {
+              setAddEditTask((state) => !state);
             }}
-          >+</button>
-          <EllipsisVertical className=" cursor-pointer" color={"#8b5cf6"} onClick={()=>{
-            setBoardType('edit');
-            setDropDown(false);
-            setElipsisOpen((state)=>!state)
-          }}/>
-          {
-            isElipsisOpen && <ElipsisMenu type={'Boards'} setOpenDeleteModal={setOpenDeleteModal} setOpenEditModal={setOpenEditModal}/>
-          }
+          >
+            {" "}
+            + Add New Task
+          </button>
+          <button
+            className=" button rounded-full md:hidden"
+            onClick={() => {
+              setAddEditTask((state) => !state);
+            }}
+          >
+            +
+          </button>
+          <EllipsisVertical
+            className=" cursor-pointer"
+            color={"#8b5cf6"}
+            onClick={() => {
+              setBoardType("edit");
+              setDropDown(false);
+              setElipsisOpen((state) => !state);
+            }}
+          />
+          {isElipsisOpen && (
+            <ElipsisMenu
+              type={"Boards"}
+              setOpenDeleteModal={setOpenDeleteModal}
+              setOpenEditModal={setOpenEditModal}
+            />
+          )}
         </div>
       </header>
 
@@ -86,9 +103,9 @@ const Header = ({ boardModalOpen, setBoardModalOpen }) => {
           setBoardModalOpen={setBoardModalOpen}
         />
       )}
-      {
-        openAddEditTask&& <AddTaskModal setAddEditTask={setAddEditTask} type={'add'}/>
-      }
+      {openAddEditTask && (
+        <AddTaskModal setAddEditTask={setAddEditTask} type={"add"} />
+      )}
     </div>
   );
 };
