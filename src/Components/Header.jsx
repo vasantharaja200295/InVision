@@ -3,11 +3,14 @@ import logo from "../assets/react.svg";
 import { ChevronDown, ChevronUp, EllipsisVertical } from "react-ionicons";
 import HeaderDropDown from "./HeaderDropDown";
 import AddEditBoardModal from "../Modals/AddEditBoardModal";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import AddTaskModal from "../Modals/AddTaskModal";
 import ElipsisMenu from "./ElipsisMenu";
+import DeleteModal from "../Modals/DeleteModal";
+import boardsSlice from "../redux/boardsSlice";
 
 const Header = ({ boardModalOpen, setBoardModalOpen }) => {
+  const dispatch = useDispatch()
   const [openDropDown, setDropDown] = useState(false);
   const [openAddEditTask, setAddEditTask] = useState(false);
   const [isElipsisOpen, setElipsisOpen] = useState(false);
@@ -26,6 +29,13 @@ const Header = ({ boardModalOpen, setBoardModalOpen }) => {
     setIsDeleteModalOpen(true);
     setElipsisOpen(false);
   };
+
+
+  const handleDelete = () =>{
+    dispatch(boardsSlice.actions.deleteBoard())
+    dispatch(boardsSlice.actions.setBoardActive({index:0}))
+    setIsDeleteModalOpen(false);
+  }
 
   return (
     <div className=" p-4 fixed left-0 bg-white dark:bg-slate-900 z-50 right-0">
@@ -106,6 +116,10 @@ const Header = ({ boardModalOpen, setBoardModalOpen }) => {
       {openAddEditTask && (
         <AddTaskModal setAddEditTask={setAddEditTask} type={"add"} />
       )}
+
+      {
+        isDeleteModalOpen && (<DeleteModal type={"Board"} title={board.name} setDeleteModal={setIsDeleteModalOpen} handleClick={handleDelete}/>)
+      }
     </div>
   );
 };
